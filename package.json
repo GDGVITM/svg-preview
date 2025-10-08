@@ -9,13 +9,27 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onLanguage:html",
+    "onLanguage:xml",
+    "onLanguage:javascript",
+    "onLanguage:typescript",
+    "onLanguage:css",
+    "onLanguage:scss",
+    "onLanguage:vue",
+    "onLanguage:jsx",
+    "onLanguage:tsx"
+  ],
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "svg.helloWorld",
-        "title": "Hello World"
+        "command": "svg.openSvgContent",
+        "title": "Open SVG Content"
+      },
+      {
+        "command": "svg.openSvgFile",
+        "title": "Open SVG File"
       }
     ]
   },

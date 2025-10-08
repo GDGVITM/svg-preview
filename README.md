@@ -70,3 +70,41 @@ You can author your README using Visual Studio Code. Here are some useful editor
 
 **Enjoy!**
 # svg-preview
+
+This extension provides inline previews for SVG content in VS Code. Simply hover over SVG tags or SVG file references to see a live preview of the image.
+
+## Features
+
+- **Inline SVG Preview**: Hover over any `<svg>...</svg>` tag to see a live preview of the image
+- **SVG File Preview**: Hover over `.svg` file references to preview the image
+- **Auto-hide**: Previews automatically disappear after 1.8 seconds
+- **Click-to-Open**: Click on any preview to open the SVG content in a new editor tab
+- **Multi-language Support**: Works with HTML, XML, JavaScript, TypeScript, CSS, SCSS, Vue, JSX, and TSX files
+
+![SVG Preview Demo](images/demo.gif)
+
+## How to Use
+
+1. Open any file containing SVG tags or SVG file references
+2. Hover your cursor over an SVG tag or `.svg` file reference
+3. A preview popup will appear showing the rendered SVG
+4. Click on the preview to open the SVG content in a new tab
+
+## Requirements
+
+- Visual Studio Code v1.104.0 or higher
+
+## Release Notes
+
+### 0.0.1
+
+Initial release of svg-preview with hover preview functionality
+
+## Known Issues
+
+- Some complex SVG files may not render correctly in the preview
+- File resolution for relative paths may not work in all scenarios
+
+---
+
+**Enjoy!**
