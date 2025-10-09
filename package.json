@@ -1,8 +1,18 @@
 {
   "name": "svg",
   "displayName": "svg-preview",
+  "publisher":"SinghAman21",
   "description": "this shall help the user to preview the svg element",
-  "version": "0.0.1",
+  "version": "0.0.2",
+  "icon": "logo_svg.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SinghAman21/svg-preview.git"
+  },
+  "bugs": {
+    "url": "https://github.com/SinghAman21/svg-preview/issues"
+  },
+  "homepage": "https://github.com/SinghAman21/svg-preview#readme",
   "engines": {
     "vscode": "^1.104.0"
   },

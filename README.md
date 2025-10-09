@@ -49,7 +49,7 @@ Currently, this extension has no configurable settings.
 
 ## Release Notes
 
-### 0.0.1 (2025-10-09)
+### 0.0.2 (2025-10-10)
 
 - Initial release with SVG hover preview functionality
 - Added support for inline SVG tag previews
@@ -57,5 +57,16 @@ Currently, this extension has no configurable settings.
 - Implemented auto-hide after 1.8 seconds
 - Added click-to-open functionality
 - Multi-language support
+
+## Contributing
+
+We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details on how to submit pull requests, report issues, and contribute to the project.
+
+## Support
+
+If you encounter any problems or have suggestions, please:
+1. Check the [Known Issues](#known-issues) section
+2. Search for existing [issues](https://github.com/SinghAman21/svg-preview/issues)
+3. File a new [issue](https://github.com/SinghAman21/svg-preview/issues/new) if needed
 
 **Enjoy!**
