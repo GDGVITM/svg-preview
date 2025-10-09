@@ -1,87 +1,34 @@
-# svg README
+# SVG Preview Extension
 
-This is the README for your extension "svg". After writing up a brief description, we recommend including the following sections.
+A Visual Studio Code extension that provides instant SVG previews directly in your editor. Hover over SVG content or file references to see live previews without leaving your code.
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
-
-For example if there is an image subfolder under your extension project workspace:
-
-\!\[feature X\]\(images/feature-x.png\)
-
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+- **Inline SVG Preview**: Hover over any `<svg>...</svg>` tag to see a live preview
+- **File Reference Preview**: Hover over `.svg` file references to preview the image
+- **Auto-hide**: Previews automatically disappear after 1.8 seconds for a clean interface
+- **Click-to-Open**: Click any preview to open the SVG content in a new editor tab (beta-stage)
+- **Multi-language Support**: Works with:
+  - HTML
+  - XML
+  - JavaScript/TypeScript
+  - CSS/SCSS
+  - Vue
+  - JSX/TSX
 
 ## Requirements
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+- Visual Studio Code version 1.104.0 or higher
+- No additional dependencies required
 
-## Extension Settings
+## Usage
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
-
-## Known Issues
-
-Calling out known issues can help limit users opening duplicate issues against your extension.
-
-## Release Notes
-
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
----
-
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
-# svg-preview
-
-This extension provides inline previews for SVG content in VS Code. Simply hover over SVG tags or SVG file references to see a live preview of the image.
-
-## Features
-
-- **Inline SVG Preview**: Hover over any `<svg>...</svg>` tag to see a live preview of the image
-- **SVG File Preview**: Hover over `.svg` file references to preview the image
-- **Auto-hide**: Previews automatically disappear after 1.8 seconds
-- **Click-to-Open**: Click on any preview to open the SVG content in a new editor tab
-- **Multi-language Support**: Works with HTML, XML, JavaScript, TypeScript, CSS, SCSS, Vue, JSX, and TSX files
-
-![SVG Preview Demo](images/demo.gif)
+1. Install the extension
+2. Open any supported file type containing SVG content
+3. Hover over:
+   - Any `<svg>` tag
+   - Any reference to an `.svg` file
+4. The preview will appear automatically
 
 ## How to Use
 
@@ -90,21 +37,25 @@ This extension provides inline previews for SVG content in VS Code. Simply hover
 3. A preview popup will appear showing the rendered SVG
 4. Click on the preview to open the SVG content in a new tab
 
-## Requirements
+## Extension Settings
 
-- Visual Studio Code v1.104.0 or higher
-
-## Release Notes
-
-### 0.0.1
-
-Initial release of svg-preview with hover preview functionality
+Currently, this extension has no configurable settings.
 
 ## Known Issues
 
-- Some complex SVG files may not render correctly in the preview
-- File resolution for relative paths may not work in all scenarios
+1. Some complex SVG files may not render correctly in the preview
+2. File resolution for relative paths may not work in all scenarios
+3. Preview may flicker on some systems when auto-hiding
 
----
+## Release Notes
+
+### 0.0.1 (2025-10-09)
+
+- Initial release with SVG hover preview functionality
+- Added support for inline SVG tag previews
+- Added support for SVG file reference previews
+- Implemented auto-hide after 1.8 seconds
+- Added click-to-open functionality
+- Multi-language support
 
 **Enjoy!**
