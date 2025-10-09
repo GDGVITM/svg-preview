@@ -1,8 +1,8 @@
 {
-  "name": "svg",
-  "displayName": "svg-preview",
+  "name": "svg-preview-hover",
+  "displayName": "SVG Hover Preview",
   "publisher":"SinghAman21",
-  "description": "this shall help the user to preview the svg element",
+  "description": "Instant SVG previews on hover with auto-hide functionality for a cleaner coding experience",
   "version": "0.0.2",
   "icon": "logo_svg.png",
   "repository": {
