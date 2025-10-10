@@ -62,6 +62,8 @@ Currently, this extension has no configurable settings.
 
 We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details on how to submit pull requests, report issues, and contribute to the project.
 
+You can paste the entire codebase in C:/users/.vscode/extensions so that you can access it just like any other extensions.
+
 ## Support
 
 If you encounter any problems or have suggestions, please:

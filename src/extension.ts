@@ -7,9 +7,12 @@ import * as vscode from 'vscode';
 export function activate(context: vscode.ExtensionContext) {
   // Register the hover provider for SVG previews
   const hoverProviderDisposable = vscode.languages.registerHoverProvider(
-    '*', // Register for all file types
+    ['*', 'svg'], // Register for all file types and explicitly for SVG
     new SvgHoverProvider()
   );
+  
+  // Show a message that the extension is activated
+  vscode.window.showInformationMessage('SVG Preview extension is now active!');
 
   // Register document formatting provider for SVG files
   const formattingProviderDisposable = vscode.languages.registerDocumentFormattingEditProvider('svg', {
@@ -25,11 +28,32 @@ export function activate(context: vscode.ExtensionContext) {
   // Register command to open SVG content in a new tab
   const openSvgContentDisposable = vscode.commands.registerCommand('svg.openSvgContent', async (args: { content: string }) => {
     if (args && args.content) {
-      const document = await vscode.workspace.openTextDocument({
-        content: args.content,
-        language: 'xml'
-      });
-      await vscode.window.showTextDocument(document, { preview: false });
+      try {
+        // Create a new untitled document with SVG content
+        const document = await vscode.workspace.openTextDocument({
+          content: args.content,
+          language: 'svg'
+        });
+
+        // Show the document in a new editor group (tab)
+        await vscode.window.showTextDocument(document, {
+          preview: false,
+          viewColumn: vscode.ViewColumn.Active,  // Changed to Active to open in current view
+          preserveFocus: false  // Ensure focus moves to the new tab
+        });
+
+        // Format the document for better readability
+        await vscode.commands.executeCommand('editor.action.formatDocument');
+
+        // Log success for debugging
+        console.log('Successfully opened SVG content in new tab');
+      } catch (error) {
+        console.error('Error opening SVG content:', error);
+        vscode.window.showErrorMessage(`Failed to open SVG content: ${error}`);
+      }
+    } else {
+      console.error('No content provided to svg.openSvgContent command');
+      vscode.window.showErrorMessage('No SVG content provided to open');
     }
   });
 
@@ -40,7 +64,15 @@ export function activate(context: vscode.ExtensionContext) {
         // Try to open as a workspace file first
         const fileUri = vscode.Uri.file(args.filePath);
         const document = await vscode.workspace.openTextDocument(fileUri);
-        await vscode.window.showTextDocument(document, { preview: false });
+        
+        // Show the document in a new editor group (tab)
+        await vscode.window.showTextDocument(document, {
+          preview: false,
+          viewColumn: vscode.ViewColumn.Beside  // Opens in a split view
+        });
+
+        // Format the document for better readability
+        await vscode.commands.executeCommand('editor.action.formatDocument');
       } catch (error) {
         // If that fails, show an error message
         vscode.window.showErrorMessage(`Could not open SVG file: ${args.filePath}`);
@@ -176,16 +208,21 @@ class SvgHoverProvider implements vscode.HoverProvider {
     // Create a MarkdownString with the SVG content
     const markdownString = new vscode.MarkdownString();
     markdownString.supportHtml = true;
+    markdownString.isTrusted = true;  // Allow command URIs to be executed
     
     // Create a data URI for the SVG content
     const svgDataUri = `data:image/svg+xml,${encodeURIComponent(svgContent)}`;
     
     // Set the hover content with click handling
+    const commandArgs = { content: svgContent };
     markdownString.value = `
 ![SVG Preview](${svgDataUri}|width=300,height=200)
 
-[Click to open in new tab](command:svg.openSvgContent?${encodeURIComponent(JSON.stringify({ content: svgContent }))})
-`;
+[Click to open in new tab](command:svg.openSvgContent?${encodeURIComponent(JSON.stringify(commandArgs))})
+
+*Click the link above to open the SVG in a new editor tab*
+
+[Open SVG](${vscode.Uri.parse(`command:svg.openSvgContent?${encodeURIComponent(JSON.stringify(commandArgs))}`)})`;
     
     const hover = new vscode.Hover(markdownString, range);
     
