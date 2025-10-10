@@ -3,7 +3,7 @@
   "displayName": "SVG Hover Preview",
   "publisher":"SinghAman21",
   "description": "Instant SVG previews on hover with auto-hide functionality for a cleaner coding experience",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "icon": "logo_svg.png",
   "license": "MIT",
   "repository": {
