@@ -16,6 +16,12 @@ A Visual Studio Code extension that provides instant SVG previews directly in yo
   - Vue
   - JSX/TSX
 
+## Demo
+
+Watch the extension in action:
+
+[▶️ Watch Full Demo Video](https://drive.google.com/file/d/1mLCzWXZklClPMEZYGZq4k95xTkC2gqnC/view?usp=sharing)
+
 ## Requirements
 
 - Visual Studio Code version 1.104.0 or higher
