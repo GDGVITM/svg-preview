@@ -25,11 +25,24 @@ export function activate(context: vscode.ExtensionContext) {
   // Register command to open SVG content in a new tab
   const openSvgContentDisposable = vscode.commands.registerCommand('svg.openSvgContent', async (args: { content: string }) => {
     if (args && args.content) {
-      const document = await vscode.workspace.openTextDocument({
-        content: args.content,
-        language: 'xml'
-      });
-      await vscode.window.showTextDocument(document, { preview: false });
+      try {
+        // Create a new untitled document with SVG content
+        const document = await vscode.workspace.openTextDocument({
+          content: args.content,
+          language: 'svg'  // Changed from 'xml' to 'svg' for proper syntax highlighting
+        });
+
+        // Show the document in a new editor group (tab)
+        await vscode.window.showTextDocument(document, {
+          preview: false,
+          viewColumn: vscode.ViewColumn.Beside  // Opens in a split view
+        });
+
+        // Format the document for better readability
+        await vscode.commands.executeCommand('editor.action.formatDocument');
+      } catch (error) {
+        vscode.window.showErrorMessage(`Failed to open SVG content: ${error}`);
+      }
     }
   });
 
@@ -40,7 +53,15 @@ export function activate(context: vscode.ExtensionContext) {
         // Try to open as a workspace file first
         const fileUri = vscode.Uri.file(args.filePath);
         const document = await vscode.workspace.openTextDocument(fileUri);
-        await vscode.window.showTextDocument(document, { preview: false });
+        
+        // Show the document in a new editor group (tab)
+        await vscode.window.showTextDocument(document, {
+          preview: false,
+          viewColumn: vscode.ViewColumn.Beside  // Opens in a split view
+        });
+
+        // Format the document for better readability
+        await vscode.commands.executeCommand('editor.action.formatDocument');
       } catch (error) {
         // If that fails, show an error message
         vscode.window.showErrorMessage(`Could not open SVG file: ${args.filePath}`);
