@@ -5,6 +5,7 @@
   "description": "Instant SVG previews on hover with auto-hide functionality for a cleaner coding experience",
   "version": "0.0.3",
   "icon": "logo_svg.png",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/SinghAman21/svg-preview.git"
