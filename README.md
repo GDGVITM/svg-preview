@@ -55,7 +55,7 @@ Currently, this extension has no configurable settings.
 
 ## Release Notes
 
-### 0.0.2 (2025-10-10)
+### 0.0.3 (2025-10-10)
 
 - Initial release with SVG hover preview functionality
 - Added support for inline SVG tag previews
