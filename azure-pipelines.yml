@@ -1,0 +1,55 @@
+# Node.js
+# Build a general Node.js project with npm.
+# Add steps that analyze code, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
+
+trigger:
+  branches:
+    include:
+    - main
+  paths:
+    exclude:
+    - '**.md'
+    - '.gitignore'
+    - '.github/**'
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  npm_config_cache: $(Pipeline.Workspace)/.npm
+
+steps:
+- task: NodeTool@0
+  inputs:
+    versionSpec: '18.x'
+  displayName: 'Install Node.js'
+
+- task: Cache@2
+  inputs:
+    key: 'npm | "$(Agent.OS)" | package-lock.json'
+    restoreKeys: |
+      npm | "$(Agent.OS)"
+    path: $(npm_config_cache)
+  displayName: Cache npm packages
+
+- script: |
+    npm install -g @vscode/vsce
+    npm install -g ovsx
+    npm ci
+  displayName: 'Install dependencies'
+
+- script: |
+    npm run compile
+  displayName: 'Build Extension'
+
+- script: |
+    vsce package
+    vsce publish -p $(VSCE_PAT)
+  displayName: 'Publish to VS Code Marketplace'
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+
+- script: |
+    ovsx publish -p $(OPEN_VSX_TOKEN)
+  displayName: 'Publish to Open VSX Registry'
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
