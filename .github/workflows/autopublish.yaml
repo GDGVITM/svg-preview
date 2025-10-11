@@ -1,0 +1,39 @@
+name: Auto Publish Extension
+
+on:
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - '**.md'
+      - '.gitignore'
+      - '.github/**'
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        
+    - name: Install dependencies
+      run: |
+        npm install -g bun
+        bun install -g @vscode/vsce
+        bun install -g ovsx
+        bun install
+
+    - name: Build Extension
+      run: |
+        bun run compile
+        
+    - name: Publish to VS Code Marketplace
+      run: vsce publish -p ${{ secrets.VSCE_PAT }}
+      
+    - name: Publish to Open VSX Registry
+      run: npx ovsx publish -p ${{ secrets.OPEN_VSX_TOKEN }}
