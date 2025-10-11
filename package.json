@@ -3,7 +3,7 @@
   "displayName": "SVG Hover Preview",
   "publisher":"SinghAman21",
   "description": "Instant SVG previews on hover with auto-hide functionality for a cleaner coding experience",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "icon": "logo_svg.png",
   "license": "MIT",
   "repository": {
@@ -18,7 +18,9 @@
     "vscode": "^1.79.1"
   },
   "categories": [
-    "svg", "web-dev", "devtools"
+    "Visualization",
+    "Other",
+    "Programming Languages"
   ],
   "activationEvents": [
     "onLanguage:html",
@@ -59,7 +61,7 @@
     "test": "vscode-test"
   },
   "devDependencies": {
-    "@types/vscode": "^1.104.0",
+    "@types/vscode": "^1.79.0",
     "@types/mocha": "^10.0.10",
     "@types/node": "22.x",
     "@typescript-eslint/eslint-plugin": "^8.45.0",
