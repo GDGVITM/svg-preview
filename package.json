@@ -3,7 +3,7 @@
   "displayName": "SVG Hover Preview",
   "publisher":"SinghAman21",
   "description": "Instant SVG previews on hover with auto-hide functionality for a cleaner coding experience",
-  "version": "0.0.4",
+  "version": "0.1.4",
   "icon": "logo_svg.png",
   "license": "MIT",
   "repository": {
@@ -15,10 +15,10 @@
   },
   "homepage": "https://github.com/SinghAman21/svg-preview#readme",
   "engines": {
-    "vscode": "^1.104.0"
+    "vscode": "^1.79.1"
   },
   "categories": [
-    "Other"
+    "svg", "web-dev", "devtools"
   ],
   "activationEvents": [
     "onLanguage:html",
