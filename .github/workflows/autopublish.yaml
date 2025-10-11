@@ -23,17 +23,18 @@ jobs:
         
     - name: Install dependencies
       run: |
-        npm install -g bun
-        bun install -g @vscode/vsce
-        bun install -g ovsx
-        bun install
+        npm install -g @vscode/vsce
+        npm install -g ovsx
+        npm install
 
     - name: Build Extension
       run: |
-        bun run compile
+        npm run compile
         
     - name: Publish to VS Code Marketplace
-      run: vsce publish -p ${{ secrets.VSCE_PAT }}
+      run: |
+        vsce package
+        vsce publish -p ${{ secrets.VSCE_PAT }}
       
     - name: Publish to Open VSX Registry
-      run: npx ovsx publish -p ${{ secrets.OPEN_VSX_TOKEN }}
+      run: ovsx publish -p ${{ secrets.OPEN_VSX_TOKEN }}
