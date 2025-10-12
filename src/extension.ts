@@ -151,19 +151,63 @@ class SvgHoverProvider implements vscode.HoverProvider {
       return null;
     }
     
-    // Find closing > of opening tag
-    const openTagEndIndex = text.indexOf('>', openTagIndex);
+    // Find closing > of opening tag while handling attributes
+    let openTagEndIndex = -1;
+    let depth = 1;
+    let inQuote = false;
+    let quoteChar = '';
+    
+    for (let i = openTagIndex + 4; i < text.length; i++) {
+      const char = text[i];
+      if (!inQuote) {
+        if (char === '"' || char === "'") {
+          inQuote = true;
+          quoteChar = char;
+        } else if (char === '>') {
+          openTagEndIndex = i;
+          break;
+        }
+      } else if (char === quoteChar) {
+        inQuote = false;
+      }
+    }
+    
     if (openTagEndIndex === -1) {
       return null;
     }
     
-    // Find closing </svg> tag
-    const closeTagIndex = text.indexOf('</svg>', openTagEndIndex);
+    // Find closing </svg> tag by counting nested SVG tags
+    let closeTagIndex = -1;
+    depth = 1;
+    inQuote = false;
+    
+    for (let i = openTagEndIndex + 1; i < text.length; i++) {
+      const char = text[i];
+      if (!inQuote) {
+        if (char === '"' || char === "'") {
+          inQuote = true;
+          quoteChar = char;
+        } else if (text.substring(i, i + 4) === '<svg') {
+          depth++;
+          i += 3;
+        } else if (text.substring(i, i + 6) === '</svg>') {
+          depth--;
+          if (depth === 0) {
+            closeTagIndex = i;
+            break;
+          }
+          i += 5;
+        }
+      } else if (char === quoteChar) {
+        inQuote = false;
+      }
+    }
+    
     if (closeTagIndex === -1) {
       return null;
     }
     
-    // Extract the full SVG content
+    // Extract the full SVG content including nested SVGs
     const svgContent = text.substring(openTagIndex, closeTagIndex + 6); // +6 for '</svg>'
     
     // Create range for the SVG tag
@@ -210,19 +254,54 @@ class SvgHoverProvider implements vscode.HoverProvider {
     markdownString.supportHtml = true;
     markdownString.isTrusted = true;  // Allow command URIs to be executed
     
-    // Create a data URI for the SVG content
-    const svgDataUri = `data:image/svg+xml,${encodeURIComponent(svgContent)}`;
-    
-    // Set the hover content with click handling
-    const commandArgs = { content: svgContent };
-    markdownString.value = `
+    try {
+      // Validate SVG structure
+      if (!this.validateSvgStructure(svgContent)) {
+        throw new Error('Invalid SVG structure');
+      }
+
+      // Clean and validate SVG content
+      const cleanedSvg = this.cleanSvgContent(svgContent);
+      
+      // Validate the cleaned SVG
+      if (!this.validateCleanedSvg(cleanedSvg)) {
+        throw new Error('SVG validation failed after cleaning');
+      }
+      
+      // Create a data URI for the SVG content
+      const svgDataUri = `data:image/svg+xml,${encodeURIComponent(cleanedSvg)}`;
+      
+      // Set the hover content with click handling
+      const commandArgs = { content: cleanedSvg };
+      markdownString.value = `
 ![SVG Preview](${svgDataUri}|width=300,height=200)
 
 [Click to open in new tab](command:svg.openSvgContent?${encodeURIComponent(JSON.stringify(commandArgs))})
 
-*Click the link above to open the SVG in a new editor tab*
-
-[Open SVG](${vscode.Uri.parse(`command:svg.openSvgContent?${encodeURIComponent(JSON.stringify(commandArgs))}`)})`;
+*Click the link above to open the SVG in a new editor tab*`;
+    } catch (error) {
+      console.error('Error creating SVG preview:', error);
+      let errorMessage = 'Error: Could not create SVG preview. ';
+      
+      if (error instanceof Error) {
+        if (error.message === 'Invalid SVG structure') {
+          errorMessage += 'The SVG element is malformed or incomplete. Please check:\n' +
+            '- Opening and closing tags are properly matched\n' +
+            '- Required attributes (xmlns, width, height) are present\n' +
+            '- No unclosed elements or attributes';
+        } else if (error.message === 'SVG validation failed after cleaning') {
+          errorMessage += 'The SVG contains invalid or unsupported elements:\n' +
+            '- Check for broken references to filters, patterns, or gradients\n' +
+            '- Verify all referenced IDs exist in the SVG\n' +
+            '- Ensure all required namespaces are declared';
+        } else {
+          errorMessage += 'An unexpected error occurred while processing the SVG:\n' +
+            '- ' + error.message;
+        }
+      }
+      
+      markdownString.value = errorMessage;
+    }
     
     const hover = new vscode.Hover(markdownString, range);
     
@@ -293,5 +372,194 @@ class SvgHoverProvider implements vscode.HoverProvider {
       // but the timer is set up for potential future use
       this.hideTimer = null;
     }, 1800);
+  }
+
+  /**
+   * Cleans and validates SVG content
+   * @param svgContent The raw SVG content
+   * @returns Cleaned SVG content
+   */
+  /**
+   * Validates the basic structure of an SVG element
+   * @param svgContent The SVG content to validate
+   * @returns boolean indicating if the SVG structure is valid
+   */
+  private validateSvgStructure(svgContent: string): boolean {
+    // Check for basic SVG structure
+    if (!svgContent.trim().startsWith('<svg') || !svgContent.trim().endsWith('</svg>')) {
+      return false;
+    }
+
+    // Check for balanced tags
+    let depth = 0;
+    let inQuote = false;
+    let quoteChar = '';
+    
+    for (let i = 0; i < svgContent.length; i++) {
+      const char = svgContent[i];
+      
+      if (!inQuote) {
+        if (char === '"' || char === "'") {
+          inQuote = true;
+          quoteChar = char;
+        } else if (char === '<') {
+          if (svgContent.substring(i, i + 2) === '</') {
+            depth--;
+            if (depth < 0) return false;
+          } else {
+            depth++;
+          }
+        }
+      } else if (char === quoteChar) {
+        inQuote = false;
+      }
+    }
+
+    return depth === 0 && !inQuote;
+  }
+
+  /**
+   * Validates the cleaned SVG content
+   * @param cleanedSvg The cleaned SVG content to validate
+   * @returns boolean indicating if the cleaned SVG is valid
+   */
+  private validateCleanedSvg(cleanedSvg: string): boolean {
+    // Check for required attributes
+    if (!cleanedSvg.includes('xmlns=')) {
+      return false;
+    }
+
+    // Validate all url() references point to existing IDs
+    const urlRefs = cleanedSvg.match(/url\(#[^)]+\)/g) || [];
+    const definedIds = new Set<string>();
+    const idMatches = cleanedSvg.matchAll(/id=["']([^"']+)["']/g);
+    
+    for (const match of idMatches) {
+      definedIds.add(match[1]);
+    }
+
+    for (const ref of urlRefs) {
+      const id = ref.match(/url\(#([^)]+)\)/)?.[1];
+      if (id && !definedIds.has(id)) {
+        return false;
+      }
+    }
+
+    // Check for unclosed tags
+    const openTags = new Set<string>();
+    const tagRegex = /<(\/?)([\w-]+)[^>]*>/g;
+    let match;
+
+    while ((match = tagRegex.exec(cleanedSvg)) !== null) {
+      const [, isClosing, tagName] = match;
+      if (!isClosing) {
+        if (!match[0].endsWith('/>')) { // Not self-closing
+          openTags.add(tagName);
+        }
+      } else {
+        if (!openTags.delete(tagName)) {
+          return false; // Closing tag without opening tag
+        }
+      }
+    }
+
+    return openTags.size === 0;
+  }
+
+  private cleanSvgContent(svgContent: string): string {
+    // Remove comments but preserve CDATA sections
+    svgContent = svgContent.replace(/<!--(?!>)[\s\S]*?-->/g, '');
+    
+    // Check and add required namespaces
+    if (!svgContent.includes('xmlns=')) {
+      svgContent = svgContent.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"');
+    }
+    if (svgContent.includes('xlink:') && !svgContent.includes('xmlns:xlink=')) {
+      svgContent = svgContent.replace('<svg', '<svg xmlns:xlink="http://www.w3.org/1999/xlink"');
+    }
+
+    // Extract and validate view properties
+    const viewBox = svgContent.match(/viewBox=["']([^"']+)["']/);
+    const width = svgContent.match(/width=["']([^"']+)["']/);
+    const height = svgContent.match(/height=["']([^"']+)["']/);
+
+    // Add or adjust viewBox if needed
+    if (!viewBox) {
+      if (width && height) {
+        const w = width[1].replace(/[^\d.]/g, '');
+        const h = height[1].replace(/[^\d.]/g, '');
+        svgContent = svgContent.replace('<svg', `<svg viewBox="0 0 ${w} ${h}"`);
+      } else {
+        // Default viewBox if no dimensions found
+        svgContent = svgContent.replace('<svg', '<svg viewBox="0 0 300 200"');
+      }
+    }
+
+    // Add default dimensions if missing
+    if (!width || !height) {
+      const defaultWidth = '300';
+      const defaultHeight = '200';
+      if (!width) {
+        svgContent = svgContent.replace('<svg', `<svg width="${defaultWidth}"`);
+      }
+      if (!height) {
+        svgContent = svgContent.replace('<svg', `<svg height="${defaultHeight}"`);
+      }
+    }
+
+    // Process all references (filter, clip-path, mask, pattern, etc.)
+    const refTypes = ['filter', 'clip-path', 'mask', 'pattern', 'linearGradient', 'radialGradient'];
+    const definedIds = new Set<string>();
+    
+    // First pass: collect all defined IDs
+    const idRegex = /id=["']([^"']+)["']/g;
+    let match;
+    while ((match = idRegex.exec(svgContent)) !== null) {
+      definedIds.add(match[1]);
+    }
+
+    // Second pass: validate all references
+    refTypes.forEach(refType => {
+      const refRegex = new RegExp(`${refType}=["']url\\(#([^)]+)\\)["']`, 'g');
+      let refMatch;
+      while ((refMatch = refRegex.exec(svgContent)) !== null) {
+        const refId = refMatch[1];
+        if (!definedIds.has(refId)) {
+          // Remove only this specific reference
+          const fullRef = refMatch[0];
+          svgContent = svgContent.replace(fullRef, '');
+        }
+      }
+    });
+
+    // Handle image references
+    const imageRegex = /<image[^>]+xlink:href=["']([^"']+)["'][^>]*>/g;
+    svgContent = svgContent.replace(imageRegex, (match, href) => {
+      // If it's a data URI, keep it as is
+      if (href.startsWith('data:')) {
+        return match;
+      }
+      
+      // If it's an external image, try to convert to a relative path
+      try {
+        const uri = vscode.Uri.parse(href);
+        return match.replace(href, uri.toString());
+      } catch {
+        // If parsing fails, keep the original reference
+        return match;
+      }
+    });
+
+    // Handle nested SVG elements
+    const nestedSvgRegex = /(<svg[^>]*>)([\s\S]*?)(<\/svg>)/g;
+    svgContent = svgContent.replace(nestedSvgRegex, (match, openTag, content, closeTag) => {
+      // Ensure nested SVGs have proper namespaces
+      if (!openTag.includes('xmlns=')) {
+        openTag = openTag.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"');
+      }
+      return openTag + content + closeTag;
+    });
+    
+    return svgContent;
   }
 }
