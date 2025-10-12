@@ -210,19 +210,25 @@ class SvgHoverProvider implements vscode.HoverProvider {
     markdownString.supportHtml = true;
     markdownString.isTrusted = true;  // Allow command URIs to be executed
     
-    // Create a data URI for the SVG content
-    const svgDataUri = `data:image/svg+xml,${encodeURIComponent(svgContent)}`;
-    
-    // Set the hover content with click handling
-    const commandArgs = { content: svgContent };
-    markdownString.value = `
+    try {
+      // Clean and validate SVG content
+      const cleanedSvg = this.cleanSvgContent(svgContent);
+      
+      // Create a data URI for the SVG content
+      const svgDataUri = `data:image/svg+xml,${encodeURIComponent(cleanedSvg)}`;
+      
+      // Set the hover content with click handling
+      const commandArgs = { content: cleanedSvg };
+      markdownString.value = `
 ![SVG Preview](${svgDataUri}|width=300,height=200)
 
 [Click to open in new tab](command:svg.openSvgContent?${encodeURIComponent(JSON.stringify(commandArgs))})
 
-*Click the link above to open the SVG in a new editor tab*
-
-[Open SVG](${vscode.Uri.parse(`command:svg.openSvgContent?${encodeURIComponent(JSON.stringify(commandArgs))}`)})`;
+*Click the link above to open the SVG in a new editor tab*`;
+    } catch (error) {
+      console.error('Error creating SVG preview:', error);
+      markdownString.value = 'Error: Could not create SVG preview. The SVG might be incomplete or contain invalid references.';
+    }
     
     const hover = new vscode.Hover(markdownString, range);
     
@@ -293,5 +299,40 @@ class SvgHoverProvider implements vscode.HoverProvider {
       // but the timer is set up for potential future use
       this.hideTimer = null;
     }, 1800);
+  }
+
+  /**
+   * Cleans and validates SVG content
+   * @param svgContent The raw SVG content
+   * @returns Cleaned SVG content
+   */
+  private cleanSvgContent(svgContent: string): string {
+    // Remove comments
+    svgContent = svgContent.replace(/<!--[\s\S]*?-->/g, '');
+    
+    // Check if SVG has required attributes
+    if (!svgContent.includes('xmlns=')) {
+      svgContent = svgContent.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"');
+    }
+
+    // Add viewBox if missing but width/height present
+    if (!svgContent.includes('viewBox=')) {
+      const widthMatch = svgContent.match(/width=["'](\d+)/);
+      const heightMatch = svgContent.match(/height=["'](\d+)/);
+      if (widthMatch && heightMatch) {
+        svgContent = svgContent.replace('<svg', `<svg viewBox="0 0 ${widthMatch[1]} ${heightMatch[1]}"`);
+      }
+    }
+
+    // Add default dimensions if missing
+    if (!svgContent.match(/width=["']\d+/) && !svgContent.match(/height=["']\d+/)) {
+      svgContent = svgContent.replace('<svg', '<svg width="300" height="200"');
+    }
+
+    // Remove invalid filter/pattern references that might cause loading issues
+    svgContent = svgContent.replace(/filter=["']url\([^)]+\)["']/g, '');
+    svgContent = svgContent.replace(/clip-path=["']url\([^)]+\)["']/g, '');
+    
+    return svgContent;
   }
 }
