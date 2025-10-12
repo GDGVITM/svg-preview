@@ -1,9 +1,9 @@
 {
   "name": "svg-preview-hover",
   "displayName": "SVG Hover Preview",
-  "publisher":"SinghAman21",
+  "publisher": "SinghAman21",
   "description": "Instant SVG previews on hover with auto-hide functionality for a cleaner coding experience",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "icon": "logo_svg.png",
   "license": "MIT",
   "repository": {
@@ -48,6 +48,7 @@
   },
   "scripts": {
     "vscode:prepublish": "pnpm run package",
+    "publish-extension": "node scripts/publish.js",
     "compile": "pnpm run check-types && pnpm run lint && node esbuild.js",
     "watch": "npm-run-all -p watch:*",
     "watch:esbuild": "node esbuild.js --watch",
@@ -61,16 +62,17 @@
     "test": "vscode-test"
   },
   "devDependencies": {
-    "@types/vscode": "^1.79.0",
     "@types/mocha": "^10.0.10",
     "@types/node": "22.x",
+    "@types/vscode": "^1.79.0",
     "@typescript-eslint/eslint-plugin": "^8.45.0",
     "@typescript-eslint/parser": "^8.45.0",
-    "eslint": "^9.36.0",
-    "esbuild": "^0.25.10",
-    "npm-run-all": "^4.1.5",
-    "typescript": "^5.9.3",
     "@vscode/test-cli": "^0.0.11",
-    "@vscode/test-electron": "^2.5.2"
+    "@vscode/test-electron": "^2.5.2",
+    "dotenv": "^17.2.3",
+    "esbuild": "^0.25.10",
+    "eslint": "^9.36.0",
+    "npm-run-all": "^4.1.5",
+    "typescript": "^5.9.3"
   }
 }
